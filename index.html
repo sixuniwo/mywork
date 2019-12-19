@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<style type="text/css">
+			*{margin: 0; padding: 0;font-family: "微软雅黑";}
+			/*隐藏 *  */
+			body{overflow: hidden;};
+		</style>
+	</head>
+	<body>
+		<audio src="img/1.mp3" controls="controls" preload id="music" loop="true"  hidden> </audio>
+        <button id="a" onclick="a();" style="margin: auto;margin-left: 47%;margin-top: 50px;">音乐播放/暂停</button>
+		<script type="text/javascript">
+			window.onload = function(){
+				game.exe();
+			};
+			var game = {
+				//启动程序
+				exe : function(){
+					document.body.style.background = '#000';
+					var oDiv = document.createElement('div');
+					oDiv.id = 'gamebox';
+					oDiv.style.cssText = 'width:300px;height: 500px;border:10px solid #fff;margin:50px auto;font-family: "微软雅黑";text-align: center;position: relative;overflow: hidden;';
+					document.body.appendChild(oDiv);
+					this.init();
+				},
+				
+				//分数
+				score:0,
+				
+				ifEnd:false,
+				//初始化
+				init : function(){
+					var This = this;//存一个指针
+					var oDiv = document.getElementById('gamebox');
+					oDiv.innerHTML = '';
+					//重新开始，一切还原
+					game.score = 0;
+					game.ifEnd = false;
+				    var oh = document.createElement('h1');
+					oh.innerHTML='王思聪与奖杯';
+					oh.style.cssText = 'color: #fff;font-size: 30px;font-weight: normal;padding-top: 50px;';
+					oDiv.appendChild(oh);
+					for(var i=0;i<4;i++)
+					{
+						var op = document.createElement('p');
+						op.index = i;//设定一个序列号，
+						op.style.cssText = 'font-size: 14px; color: #000; width: 150px; height: 40px;margin:50px auto ;text-align: center;line-height:40px;background: #fff;cursor: pointer;';
+						var html = '';
+						//当鼠标移动到四个模块时
+						op.onmouseenter = function(){
+						this.style.background = '#f60';
+						this.style.color = '#fff';
+					};
+					    //移动回去时
+					    op.onmouseleave = function(){
+						this.style.background = '#fff';
+						this.style.color = '#000';
+					};
+					    op.onclick = function(e){
+						e = e||window.event;
+						This.start(this.index,oDiv,e);
+					};
+						switch (i)
+						{
+							case 0:
+							    html = '简单';
+							    break;
+							case 1:
+							    html = '一般';
+							    break;
+							case 2:
+							    html = '困难';
+							    break;
+							case 3:
+							    html = '你咋不上天呢';
+							    op.style.color = '#f00';
+							    op.style.fontWeight = 'bold';
+							    op.onmouseenter = function(){
+						           this.style.background = '#f60';
+					};
+							    op.onmouseleave = function(){
+						             this.style.background = '#fff';
+					};
+							    break;
+						}
+					op.innerHTML = html;
+					oDiv.appendChild(op);
+					}
+				},
+				
+				//游戏开始
+				start : function(index,ogamebox,e){
+					ogamebox.innerHTML = '';//晴空页面内容
+					var oS = document.createElement('span');
+					    oS.innerHTML = this.score;
+					    oS.style.cssText = 'position: absolute;left: 15px;top: 10px;font-size: 16px;color: #fff;';
+					ogamebox.appendChild(oS);    
+					this.plane(ogamebox,e,index);
+					//敌军生成
+					this.enemy(ogamebox,oS,index);
+				},
+				//关于飞机
+				plane:function(ogamebox,e,index){
+					var x = e.pageX,//水平坐标
+					    y = e.pageY;//垂直坐标
+					var oPlane = new Image();
+					oPlane.src = 'img/11.png';//document.createElement('img');
+					oPlane.width = 60;
+					oPlane.height = 36;
+					oPlane.id = 'plane';
+					var ty = ogamebox.offsetTop + parseInt(ogamebox.style.borderWidth) + oPlane.height/2;
+					var lx = ogamebox.offsetLeft + parseInt(ogamebox.style.borderWidth) + oPlane.width/2;
+					window.onresize = function(){
+						lx = ogamebox.offsetLeft + parseInt(ogamebox.style.borderWidth) + oPlane.width/2;
+					};
+					var top = y-ty;
+					var left = x-lx;
+					oPlane.style.cssText = 'display: block;position: absolute;top: '+top+'px;left: '+left+'px;';
+					ogamebox.appendChild(oPlane);
+					var leftmin = - oPlane.width/2;
+					//盒子宽度不包括边框减去飞机宽度的一半
+					var leftmax = ogamebox.clientWidth - oPlane.width/2;
+					var topmin = 0;
+					//盒子的高度减去图片的高度一半
+					var topmax = ogamebox.clientHeight - oPlane.height/2;
+					//飞机跟着鼠标动
+					document.onmousemove = function(e){
+						
+					    e = e||window.event;
+						//限制飞机的移动范围
+						var top = e.pageY - ty;
+						var left = e.pageX - lx;
+						//取值,防止飞机越边
+						top = Math.min(top,topmax);
+						top = Math.max(top,topmin);
+						left = Math.min(left,left);
+						left = Math.max(left,left);
+						oPlane.style.left = left + 'px';
+						oPlane.style.top = top + 'px';
+						
+						
+					};
+					this.biubiubiu(oPlane,ogamebox,index);
+				},
+				//发射子弹
+				biubiubiu : function(oPlane,ogamebox,index){
+					var speed;
+					switch(index)
+					{
+					    case 0:
+					        speed = 200;
+					        break;
+					    case 1:
+					        speed = 300;
+					        break; 
+					    case 2:
+					        speed = 400;
+					        break; 
+					    case 3:
+					        speed = 100;
+					        break;
+					}
+					this.BiuTimer = setInterval( function(){
+						var obiu = new Image();
+						obiu.src = 'img/33.png';
+						obiu .width = 60;
+						obiu.height = 60;
+						obiu.className = 'biubiubiu';
+						//飞机top减去子弹高度
+						var top = oPlane.offsetTop - obiu.height + 3;
+						//飞机left加飞机宽度一半减去子弹宽度的一半
+						var left = oPlane.offsetLeft + oPlane.width/2 - obiu.width/2;
+						obiu.style.cssText = 'position: absolute;top: '+top+'px;left: '+left+'px;';
+						ogamebox.appendChild(obiu);
+						//定时器，子弹运动
+						obiu.timer = setInterval(function(){
+							if (!obiu.parentNode) 
+							{
+								clearInterval(obiu.timer);
+							}
+							obiu.style.top = obiu.offsetTop -3 + 'px';
+							if (obiu.offsetTop < - obiu.height) 
+							{
+								clearInterval(obiu.timer);
+								obiu.parentNode.removeChild(obiu);
+							}
+							
+						},13);
+						
+					} , speed);//子弹速度，难度不同
+				},
+				//敌军
+				enemy:function(ogamebox,oS,index){
+					
+					var a , x;//下落速度,子弹生成速度
+					switch(index)
+					{
+					    case 0:
+					        a = 1;
+					        x = 300;
+					        break;
+					    case 1:
+					        a = 5;
+					        x = 200;
+					        break; 
+					    case 2:
+					        a = 9;
+					        x = 150;
+					        break; 
+					    case 3:
+					        a = 9;
+					        x = 500;
+					        break;
+					}
+					
+					this.enemyTimer = setInterval(function(){
+						var oenemy = new Image();
+						oenemy.src = 'img/66.png';
+						oenemy.width = 30;
+						oenemy.height = 30;
+						var lmin = 0;
+						var lmax = ogamebox.clientWidth - oenemy.width;
+						var left = Math.random() * (lmax-lmin) + lmin;
+						oenemy.style.cssText = 'position: absolute;top: '+(-oenemy.height)+'px;left: '+left+'px;';
+						ogamebox.appendChild(oenemy);
+						var b = Math.random() * a + 1;//一到四之间随机
+						//飞机下落，定时器工作
+						oenemy.timer = setInterval(function(){
+							//运动速度
+							oenemy.style.top = oenemy.offsetTop + b + 'px';
+							//清除敌军，超过了屏幕的高度直接清除
+							if (oenemy.offsetTop >= ogamebox.clientHeight)
+							{
+								clearInterval(oenemy.timer);
+								oenemy.parentNode.removeChild(oenemy);
+							}
+							
+						},13);//13为刷新频率
+						//和子弹的碰撞检测
+						var allBiu = game.getClass('biubiubiu');
+						//定时器
+						oenemy.pzBiu = setInterval(function(){
+							
+							for (i = 0;i < allBiu.length;i++) 
+							{
+								if (game.boom(oenemy,allBiu[i]))
+								{
+									game.score ++;//打一个飞机加一分
+									oS.innerHTML = game.score;
+									clearInterval(oenemy.pzBiu);//清除定时器
+									clearInterval(oenemy.pzplane);//清除敌军机炸后和战机的碰撞
+									//删除子弹
+									allBiu[i].parentNode.removeChild(allBiu[i]);
+									oenemy.src = 'img/2.png';
+									//炸开后消失
+									setTimeout(function(){
+										if (oenemy.parentNode) 
+										{
+											oenemy.parentNode.removeChild(oenemy);
+										}
+										
+									},300);
+									break;
+								}
+							}
+						},50);
+						//和战机的碰撞检测
+						var oPlane = document.getElementById('plane');
+						oenemy.pzplane = setInterval(function(){
+							
+							if (game.ifEnd)
+							{
+								clearInterval(oenemy.pzplane);
+							}
+							if (game.boom(oenemy,oPlane)) 
+							{
+								game.ifEnd = true;
+								clearInterval(oenemy.pzplane);
+								clearInterval(game.BiuTimer);//飞机死后子弹不产生
+							    clearInterval(game.enemyTimer);//飞机死狗敌军消失
+								oenemy.src = 'img/2.png';
+								oPlane.src = 'img/4.png';
+								setTimeout(function(){
+									game.over(ogamebox);
+									},1000);
+							}
+						},50);
+					},x);//敌军生成速度
+				},
+				//子弹与飞机碰撞，定义为两个盒子obj1，obj2
+				boom:function(obj1,obj2){
+					var T1 = obj1.offsetTop;
+					var B1 = T1 + obj1.clientHeight;
+					var L1 = obj1.offsetLeft;
+					var R1 = L1 + obj1.clientWidth;
+					
+					var T2 = obj2.offsetTop;
+					var B2 = T2 + obj1.clientHeight;
+					var L2 = obj2.offsetLeft;
+					var R2 = L2 + obj1.clientWidth;
+					
+					//没撞上
+					if (R2 < L1||L2 > R1||B2 < T1||T2 >B1) 
+					{
+						return false;//没撞上
+					}
+					else
+					{
+						return true;//撞上了
+					}
+				},
+				
+				//游戏结束
+				over :function(ogamebox){
+					ogamebox.innerHTML = '';
+					var oDiv = document.createElement('div');
+					    oDiv.style.cssText = 'width: 200px;height: 400px;margin:50px;background: #fff;';
+					var oT = document.createElement('h3');
+					    oT.innerHTML = 'game over';
+					    oT.style.cssText = 'padding-top: 50px;font-family: "微软雅黑";';
+					var oP1 = document.createElement('p');
+					    oP1.innerHTML = '您的得分是：' +'<span style = "color:#f00;font-weight:bold;">' + this.score + '</span>';
+					    oP1.style.cssText = 'font-size: 16px;color: #00ffff;';
+					
+					var oRestart = document.createElement('div');
+					    oRestart.style.cssText = 'width: 100px;height: 40px;font-size: 14px;text-align: center;line-height: 40px;color: #000;background: darkmagenta;margin: 20px auto;cursor: pointer;';
+					    oRestart.innerHTML = '不服？有种再来';
+					oRestart.onclick = function(){
+						game.init();
+					};
+					oDiv.appendChild(oT);
+					oDiv.appendChild(oP1);
+					oDiv.appendChild(oRestart);
+					ogamebox.appendChild(oDiv);
+				},
+				
+				//getclass方法，找到所有的子弹，前面的classname
+				getClass:function(cName,parent){
+					parent = parent || document;
+					if (document.getElementsByClassName) 
+					{
+						return parent.getElementsByClassName(cName);
+					}
+					else
+					{
+						var all = parent.getElementsByTagName('*');
+						var arr = [];
+						for(var i = 0;i < all.length;i++)
+						{
+							var arrClass = all.className.split(' ');
+							for(var j = 0;j < arrClass.length;j++)
+							{
+								if (arrClass[j] == cName)
+								{
+									arr.push(all[i]);
+									break;
+								}
+							}
+						}
+						return arr;
+					}
+				}
+			};
+		</script>
+		<!--音乐-->
+		<script>
+		 function a(){
+     var audio = document.getElementById('music'); 
+     if(audio.paused){                 
+         audio.play();//audio.play();// 播放  
+     }
+     else{
+          audio.pause();//暂停
+     } 
+   }
+		 </script>
+	</body>
+</html>
